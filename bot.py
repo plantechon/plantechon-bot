@@ -1,19 +1,19 @@
 from flask import Flask, request, jsonify
 import requests
-import random
 import threading
 import time
 import datetime
+import random
 import os
 from pytz import timezone
 
 # ========= CONFIG =========
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "7479827947:AAEban--PGTECN20IFdI84GqbLxSOu_q11Q")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1002580469037")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 TIMEZONE = timezone("America/Sao_Paulo")
 
-SIGNAL_COOLDOWN = 300
-INACTIVITY_CHECK = 3600
+SIGNAL_COOLDOWN = 300  # 5 minutos
+INACTIVITY_CHECK = 3600  # 1 hora
 
 # ========= TEMPLATE DA MENSAGEM =========
 TEMPLATE_MENSAGEM = """📢 *{titulo}*
@@ -40,6 +40,7 @@ TEMPLATE_MENSAGEM = """📢 *{titulo}*
 ⏱ *Horário do Sinal*: {timestamp}
 """
 
+# ========= MENSAGENS DE INATIVIDADE =========
 MENSAGENS_INATIVIDADE = [
     "📊 Sem sinais no momento.",
     "⚖️ Aguardando confirmação técnica.",
@@ -53,6 +54,7 @@ MENSAGENS_INATIVIDADE = [
     "📋 Critérios técnicos não atendidos."
 ]
 
+# ========= FLASK APP =========
 app = Flask(__name__)
 last_signal = {'time': None, 'pair': None, 'action': None}
 
@@ -78,7 +80,10 @@ def verificar_inatividade():
         time.sleep(INACTIVITY_CHECK)
         if not last_signal["time"] or (datetime.datetime.now() - last_signal["time"]).seconds >= INACTIVITY_CHECK:
             msg = random.choice(MENSAGENS_INATIVIDADE)
-            send_telegram_alert(msg)
+            if send_telegram_alert(msg):
+                print(f"⏰ Mensagem de inatividade enviada: {msg}")
+            else:
+                print("❌ Falha ao enviar mensagem de inatividade.")
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -95,7 +100,7 @@ def webhook():
         risco_pct = float(data["risco_percent"])
         tp1_pct = float(data["tp1_percent"])
         tp2_pct = float(data["tp2_percent"])
-        tp3_pct = float(data["tp3_percent"])
+        tp3_pct = float(data.get("tp3_percent", 0))
         atr = float(data.get("atr", 0))
         timeframe = data.get("timeframe", "N/D")
         timestamp = datetime.datetime.now(TIMEZONE).strftime("%d/%m %H:%M")
@@ -154,9 +159,10 @@ def webhook():
         return jsonify({"status": "ok"}), 200
 
     except Exception as e:
-        print(f"⚠️ Erro: {e}")
+        print(f"⚠️ Erro no webhook: {e}")
         return jsonify({"erro": str(e)}), 500
 
+# ========= EXECUÇÃO =========
 if __name__ == "__main__":
     threading.Thread(target=verificar_inatividade, daemon=True).start()
     app.run(host="0.0.0.0", port=5000)
