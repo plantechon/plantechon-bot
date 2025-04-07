@@ -168,7 +168,6 @@ if __name__ == "__main__":
     threading.Thread(target=verificar_inatividade, daemon=True).start()
     app.run(host="0.0.0.0", port=5000)
 
- timezone("America/Sao_Paulo")
 
 SIGNAL_COOLDOWN = 300  # 5 minutos
 INACTIVITY_CHECK = 3600  # 1 hora
