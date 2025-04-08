@@ -76,6 +76,7 @@ def verificar_inatividade():
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
+    print("🔥 WEBHOOK ACIONADO! 🔥", flush=True)
     try:
         print("✅ Sinal recebido na função webhook!")
         data = request.get_json()
