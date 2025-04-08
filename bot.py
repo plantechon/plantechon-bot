@@ -77,13 +77,13 @@ def verificar_inatividade():
 @app.route("/webhook", methods=["POST"])
 def webhook():
     print("✅ Sinal recebido na função webhook!")
-def webhook():
     global last_signal
     try:
         data = request.get_json()
         for campo in ["tipo", "ativo", "entrada", "risco_percent", "tp1_percent", "tp2_percent", "tp3_percent"]:
             if campo not in data:
                 return jsonify({"erro": f"Falta o campo {campo}"}), 400
+    return jsonify({"status": "ok"}), 200
 
         tipo = data["tipo"].lower()
         ativo = data["ativo"]
