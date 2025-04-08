@@ -76,6 +76,8 @@ def verificar_inatividade():
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
+    print("✅ Sinal recebido na função webhook!")
+def webhook():
     global last_signal
     try:
         data = request.get_json()
@@ -148,4 +150,4 @@ def webhook():
 
 if __name__ == "__main__":
     threading.Thread(target=verificar_inatividade, daemon=True).start()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
