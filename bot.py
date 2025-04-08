@@ -59,6 +59,7 @@ def send_telegram_alert(msg):
         "disable_web_page_preview": True
     }
     try:
+        print("✅ Sinal recebido na função webhook!")
         r = requests.post(url, json=payload, timeout=10)
         r.raise_for_status()
         print("📤 Mensagem enviada com sucesso para o Telegram.")
@@ -76,14 +77,13 @@ def verificar_inatividade():
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    print("✅ Sinal recebido na função webhook!")
     global last_signal
     try:
+        print("✅ Sinal recebido na função webhook!")
         data = request.get_json()
         for campo in ["tipo", "ativo", "entrada", "risco_percent", "tp1_percent", "tp2_percent", "tp3_percent"]:
             if campo not in data:
                 return jsonify({"erro": f"Falta o campo {campo}"}), 400
-    return jsonify({"status": "ok"}), 200
 
         tipo = data["tipo"].lower()
         ativo = data["ativo"]
