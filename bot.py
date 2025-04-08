@@ -59,7 +59,6 @@ def send_telegram_alert(msg):
         "disable_web_page_preview": True
     }
     try:
-        print("✅ Sinal recebido na função webhook!")
         r = requests.post(url, json=payload, timeout=10)
         r.raise_for_status()
         print("📤 Mensagem enviada com sucesso para o Telegram.")
@@ -77,9 +76,9 @@ def verificar_inatividade():
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    global last_signal
     try:
         print("✅ Sinal recebido na função webhook!")
+
         data = request.get_json()
         for campo in ["tipo", "ativo", "entrada", "risco_percent", "tp1_percent", "tp2_percent", "tp3_percent"]:
             if campo not in data:
@@ -141,13 +140,16 @@ def webhook():
         print(msg)
 
         if send_telegram_alert(msg):
-            last_signal = {"time": now, "pair": ativo, "action": tipo}
+            last_signal["time"] = now
+            last_signal["pair"] = ativo
+            last_signal["action"] = tipo
+
         return jsonify({"status": "ok"}), 200
 
     except Exception as e:
-        print(f"⚠️ Erro no webhook: {e}")
+        print(f"❌ Erro no webhook: {e}")
         return jsonify({"erro": str(e)}), 500
 
 if __name__ == "__main__":
     threading.Thread(target=verificar_inatividade, daemon=True).start()
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
