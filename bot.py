@@ -78,8 +78,8 @@ def verificar_inatividade():
 def webhook():
     try:
         print("✅ Sinal recebido na função webhook!")
-
         data = request.get_json()
+
         for campo in ["tipo", "ativo", "entrada", "risco_percent", "tp1_percent", "tp2_percent", "tp3_percent"]:
             if campo not in data:
                 return jsonify({"erro": f"Falta o campo {campo}"}), 400
