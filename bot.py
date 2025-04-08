@@ -138,6 +138,7 @@ def webhook():
         )
 
         print("Mensagem formatada:")
+        print(msg, flush=True)
         print(msg)
 
         if send_telegram_alert(msg):
